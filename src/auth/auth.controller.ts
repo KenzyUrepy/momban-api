@@ -32,10 +32,11 @@ export class AuthController {
   @Post('/connect/signin')
   async signinUser(
     @Req() req: Request,
+    @Headers() headers,
     @Body() userData: { email: string; password: string; referer: string },
-    @Query() query,
+    @Query() qurey,
   ) {
-    return await this.authService.signin(userData, query, req.cookies['session']);
+    return await this.authService.signin(userData, req.cookies['_session'], headers, qurey);
   }
 
   @Post('/connect/signup')

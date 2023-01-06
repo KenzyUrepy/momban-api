@@ -59,6 +59,7 @@ model Client {
   created_at           DateTime               @default(now())
   updated_at           DateTime               @default(now())
   ClientUsersOnClients ClientUsersOnClients[]
+  origins              Origin[]
 }
 
 model TokenSecret {
@@ -76,6 +77,17 @@ model ClientUsersOnClients {
   client_user_id Int
   client         Client     @relation(fields: [client_id], references: [id])
   client_id      Int
+  created_at     DateTime   @default(now())
+  updated_at     DateTime   @default(now())
 
   @@id([client_user_id, client_id])
+}
+
+model Origin {
+  id         Int      @id @default(autoincrement())
+  uri        String
+  client     Client   @relation(fields: [client_id], references: [id])
+  client_id  Int
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
 }

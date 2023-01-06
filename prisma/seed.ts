@@ -35,6 +35,11 @@ async function main() {
       domain: `https://${domain}.auth.momban.net:3001`,
       logout_uri: 'https://sample.app.momban.net:3002',
       name: "Ayamew's Application",
+      origins: {
+        create: {
+          uri: 'https://sample.app.momban.net:3002',
+        },
+      },
       token_secret: {
         create: {
           access_token_secret: accessTokenSecret,

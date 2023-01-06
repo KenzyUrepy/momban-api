@@ -17,11 +17,17 @@ async function bootstrap() {
     httpsOptions,
   });
 
-  const allowOrigins = (await prisma.client.findMany({ select: { domain: true } })).map(
+  const clientDomains = (await prisma.client.findMany({ select: { domain: true } })).map(
     (origin) => {
       return origin.domain;
     },
   );
+
+  const origins = (await prisma.origin.findMany({ select: { uri: true } })).map((origin) => {
+    return origin.uri;
+  });
+
+  const allowOrigins = [...clientDomains, ...origins];
 
   app.use(cookieParser());
 

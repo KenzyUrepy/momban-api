@@ -27,8 +27,8 @@ export class AuthService {
     };
   }
 
-  async signin(userData: { email: string; password: string; referer: string }, query, session) {
-    const client = await this.clientService.getClient({ domain: userData.referer });
+  async signin(userData: { email: string; password: string }, session: string, header, qurey) {
+    const client = await this.clientService.getClient({ domain: header.origin });
     const user = await this.clientUserService.getClientUser(userData.email);
     if (!bcrypt.compareSync(userData.password, user.password)) {
       throw new UnauthorizedException();
@@ -41,9 +41,9 @@ export class AuthService {
     };
     const code = Buffer.from(JSON.stringify(planeCode)).toString('base64');
 
-    const decodedSession = JSON.parse(Buffer.from(session, 'base64').toString());
-
-    return `${decodedSession.domain}/api/auth/callback?state=${decodedSession.state}&code=${code}&client_idi=${client.client_id}&callback_uri=${client.callback_uri}`;
+    return `${qurey.callback_uri.replace(/\/$/, '')}/api/auth/callback?state=${
+      JSON.parse(session).state
+    }&code=${code}&client_id=${client.client_id}&callback_uri=${client.callback_uri}`;
   }
 
   async verifyAndIssue(headers, query) {
