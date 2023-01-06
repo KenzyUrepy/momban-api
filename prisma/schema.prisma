@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int            @id @default(autoincrement())
+  name           String?
+  email          String         @unique
+  nickname       String?        @unique
+  password       String
+  auth_providers AuthProvider[]
+  clients        Client[]
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @default(now())
+}
+
+model ClientUser {
+  id                   Int                    @id @default(autoincrement())
+  name                 String?
+  email                String                 @unique
+  nickname             String?                @unique
+  password             String
+  auth_providers       AuthProvider[]
+  created_at           DateTime               @default(now())
+  updated_at           DateTime               @default(now())
+  ClientUsersOnClients ClientUsersOnClients[]
+}
+
+model AuthProvider {
+  id             Int        @id @default(autoincrement())
+  name           String
+  user           User       @relation(fields: [user_id], references: [id])
+  user_id        Int
+  client_user    ClientUser @relation(fields: [client_user_id], references: [id])
+  client_user_id Int
+  created_at     DateTime   @default(now())
+  updated_at     DateTime   @default(now())
+}
+
+model Client {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  domain               String                 @unique
+  client_id            String                 @unique @db.VarChar(512)
+  client_secret        String                 @unique @db.VarChar(512)
+  callback_uri         String?
+  logout_uri           String?
+  user                 User                   @relation(fields: [user_id], references: [id])
+  user_id              Int
+  token_secret         TokenSecret?
+  created_at           DateTime               @default(now())
+  updated_at           DateTime               @default(now())
+  ClientUsersOnClients ClientUsersOnClients[]
+}
+
+model TokenSecret {
+  id                   Int      @id @default(autoincrement())
+  access_token_secret  String   @unique @db.VarChar(512)
+  refresh_token_secret String   @unique @db.VarChar(512)
+  client               Client   @relation(fields: [client_id], references: [id])
+  client_id            Int      @unique
+  created_at           DateTime @default(now())
+  updated_at           DateTime @default(now())
+}
+
+model ClientUsersOnClients {
+  client_user    ClientUser @relation(fields: [client_user_id], references: [id])
+  client_user_id Int
+  client         Client     @relation(fields: [client_id], references: [id])
+  client_id      Int
+
+  @@id([client_user_id, client_id])
+}
