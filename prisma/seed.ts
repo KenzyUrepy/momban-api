@@ -13,12 +13,19 @@ function generateKey() {
   return crypto.randomBytes(256).toString('base64');
 }
 
+function generateDomain() {
+  return crypto.randomBytes(16).toString('hex');
+}
+
 async function main() {
-  const clientId = generateKey();
-  const clientSecret = generateKey();
-  const accessTokenSecret = generateKey();
-  const RefreshTokenSecret = generateKey();
-  const domain = crypto.randomBytes(16).toString('hex');
+  const Admin = await prisma.admin.create({
+    data: {
+      email: 'admin@momban.met',
+      name: 'admin',
+      password: await generateHashedPassword('AdminMomBanBoo'),
+    },
+  });
+
   const Ayamew = await prisma.user.create({
     data: {
       email: 'ayamew@momban.net',
@@ -30,9 +37,9 @@ async function main() {
   const AyamewClient = await prisma.client.create({
     data: {
       callback_uri: 'https://sample.app.momban.net:3002/dashboard',
-      client_id: clientId,
-      client_secret: clientSecret,
-      domain: `https://${domain}.auth.momban.net:3001`,
+      client_id: generateKey(),
+      client_secret: generateKey(),
+      domain: `https://${generateDomain()}.auth.momban.net:3001`,
       logout_uri: 'https://sample.app.momban.net:3002',
       name: "Ayamew's Application",
       origins: {
@@ -42,14 +49,14 @@ async function main() {
       },
       token_secret: {
         create: {
-          access_token_secret: accessTokenSecret,
-          refresh_token_secret: RefreshTokenSecret,
+          access_token_secret: generateKey(),
+          refresh_token_secret: generateKey(),
         },
       },
       user_id: Ayamew.id,
     },
   });
-  const Kenzy = await prisma.clientUser.create({
+  const AyamewClientUser = await prisma.clientUser.create({
     data: {
       email: 'kenzy@momban.net',
       name: 'Kenzy',
@@ -58,14 +65,20 @@ async function main() {
     },
   });
 
-  const BobOnAyaMewClient = await prisma.clientUsersOnClients.create({
+  const AyaMewOnAyaMewClient = await prisma.clientUsersOnClients.create({
     data: {
       client_id: AyamewClient.id,
-      client_user_id: Kenzy.id,
+      client_user_id: AyamewClientUser.id,
     },
   });
 
-  console.log({ Ayamew, AyamewClient, BobOnAyaMewClient, Kenzy });
+  console.log({
+    Admin,
+    AyaMewOnAyaMewClient,
+    Ayamew,
+    AyamewClient,
+    AyamewClientUser,
+  });
 }
 
 main()
